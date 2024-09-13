@@ -1,0 +1,14 @@
+<!-- order_success.html -->
+
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 text-center">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Thank you for your order!</h1>
+    <p class="text-lg text-gray-700 mb-4">Your order number is <strong>#{{ order.id }}</strong>.</p>
+    <p class="text-lg text-gray-700 mb-4">We've sent a confirmation to your email address.</p>
+    <p class="text-lg text-gray-700">We will process your order as soon as we receive the payment.</p>
+    <a href="{% url 'home' %}" class="inline-block mt-8 bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition duration-200 font-medium">
+        Continue Shopping
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,232 @@
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Site</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-gold': '#D39901',
+                        'custom-banner': '#D39901',
+                        'footer-bg': '#f3f3f3',
+                        'footer-text': '#333',
+                    },
+                    fontFamily: {
+                        'serif': ['Playfair Display', 'serif'],
+                        'sans': ['Lato', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .dropdown-submenu {
+            display: none;
+        }
+        .group/sub:hover .dropdown-submenu {
+            display: block;
+        }
+        .dropdown-menu {
+            min-width: 200px;
+        }
+        .dropdown-submenu {
+            left: 100%;
+            top: 0;
+        }
+          .zoom-container {
+            overflow: hidden;
+        }
+        .zoom-image {
+            transition: transform 0.5s ease;
+        }
+        .zoom-image:hover {
+            transform: scale(1.5);
+        }
+    </style>
+</head>
+<body class="bg-white text-black font-sans">
+    <!-- Delivery Banner -->
+<div id="deliveryBanner" class="bg-white text-black text-center py-3 px-4 relative border-b border-gray-300">
+    <p class="font-serif font-semibold text-sm">Delivery Services Available</p>
+    <button onclick="closeBanner()" class="absolute top-1/2 right-4 transform -translate-y-1/2 text-black font-bold">&times;</button>
+</div>
+
+
+   <!-- Navbar -->
+<header class="bg-black text-white py-4">
+    <div class="container mx-auto flex justify-between items-center px-4">
+        <div class="flex items-center space-x-6">
+            <div class="relative">
+                <button id="search-toggle" class="text-sm hover:text-custom-gold transition-colors">Search</button>
+                <form id="search-form" action="{% url 'search' %}" method="get" class="absolute top-full left-0 mt-2 bg-white shadow-md rounded-lg p-4 hidden">
+                    <input type="text" name="q" placeholder="Search products..." class="w-64 px-4 py-2 border rounded-full text-gray-700">
+                    <button type="submit" class="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="text-center">
+            <h1 class="text-white text-3xl font-serif">Nimrah Skincare</h1>
+        </div>
+        <div class="flex items-center space-x-6">
+            <a href="#" class="text-sm hover:text-custom-gold transition-colors" title="Wishlist">
+                <i class="far fa-heart"></i>
+            </a>
+            <a href="{% url 'view_cart' %}" class="text-sm hover:text-custom-gold transition-colors relative" title="Cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-custom-gold text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">{{ cart_count }}</span>
+            </a>
+        </div>
+    </div>
+</header>
+    <!-- Navigation Links with Dropdowns -->
+    <!-- Navigation Links with Dropdowns -->
+<!-- Navigation Links with Dropdowns -->
+<nav class="bg-black text-white py-4">
+    <div class="container mx-auto flex justify-center space-x-8">
+        <div class="dropdown inline-block relative group">
+            <a href="{% url 'home' %}" class="text-sm font-semibold hover:text-custom-gold transition-colors py-2">Home</a>
+        </div>
+        
+        {% for category in categories %}
+            <div class="dropdown inline-block relative group">
+                <a href="{% url 'category_products' category.slug %}" class="text-sm font-semibold hover:text-custom-gold transition-colors py-2">
+                    {{ category.name }}
+                </a>
+                {% if category.get_children %}
+                    <ul class="dropdown-menu absolute hidden text-gray-700 pt-2 bg-white shadow-lg rounded-lg mt-0 w-48 z-10 group-hover:block">
+                        {% for subcategory in category.get_children %}
+                            <li class="relative group/sub">
+                                <a class="{% if forloop.first %}rounded-t{% endif %} {% if forloop.last %}rounded-b{% endif %} hover:bg-gray-100 py-2 px-4 block whitespace-no-wrap" 
+                                   href="{% url 'category_products' subcategory.slug %}">
+                                    {{ subcategory.name }}
+                                </a>
+                                {% if subcategory.get_children %}
+                                    <ul class="dropdown-submenu absolute hidden text-gray-700 left-full top-0 bg-white shadow-lg rounded-lg w-48 group-hover/sub:block">
+                                        {% for subsubcategory in subcategory.get_children %}
+                                            <li>
+                                                <a class="{% if forloop.first %}rounded-t{% endif %} {% if forloop.last %}rounded-b{% endif %} hover:bg-gray-100 py-2 px-4 block whitespace-no-wrap" 
+                                                   href="{% url 'category_products' subsubcategory.slug %}">
+                                                    {{ subsubcategory.name }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</nav>
+
+    {% block content %}{% endblock %}
+
+    <footer class="bg-footer-bg text-footer-text">
+        <div class="container mx-auto py-16 px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-cursive text-custom-gold mb-6">Nimrah Skincare</h3>
+                    <p class="text-sm leading-relaxed">Discover the beauty of authentic skincare. Our curated collection brings you the best from around the world.</p>
+                    <div class="flex space-x-4 mt-6">
+                        <a href="#" class="text-footer-text hover:text-custom-gold transition-colors"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-footer-text hover:text-custom-gold transition-colors"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-footer-text hover:text-custom-gold transition-colors"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-footer-text hover:text-custom-gold transition-colors"><i class="fab fa-pinterest-p"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-custom-gold mb-6">Contact Us</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <span class="text-custom-gold">Phone:</span>
+                            <span class="ml-2">+254 722 997 917</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-custom-gold">Email:</span>
+                            <span class="ml-2">info@nimrahskincare.com</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold text-custom-gold mb-6">Location</h4>
+                    <p>Al Mukaram Shopping Mall, First Floor, Shop F17, Eastleigh, Nairobi</p>
+                    <a href="https://maps.app.goo.gl/LmpfCK9RzRcc9fy39" target="_blank" class="text-custom-gold hover:text-footer-text transition-colors">Get Directions</a>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold text-custom-gold mb-6">Operating Hours</h4>
+                    <ul class="space-y-3">
+                        <li class="flex justify-between">
+                            <span>Mon - Thu:</span>
+                            <span>9:00 AM - 7:00 PM</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Friday:</span>
+                            <span>2:00 PM - 7:00 PM</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Sat - Sun:</span>
+                            <span>9:00 AM - 7:00 PM</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-gray-200 bg-black">
+            <div class="container mx-auto py-6 px-4 flex flex-col md:flex-row justify-center items-center">
+                <p class="text-custom-gold text-center w-full md:w-auto">&copy; 2024 Nimrah Skincare. All Rights Reserved.</p>
+            </div>
+        </div>
+        </div>
+    </footer>
+    
+    <script>
+        function zoomImage(e) {
+            const container = e.currentTarget;
+            const image = container.querySelector('img');
+            const { left, top, width, height } = container.getBoundingClientRect();
+            const x = (e.clientX - left) / width * 100;
+            const y = (e.clientY - top) / height * 100;
+            image.style.transformOrigin = `${x}% ${y}%`;
+        }
+    
+        function closeBanner() {
+            document.getElementById('deliveryBanner').style.display = 'none';
+        }
+
+        function updateCartCount() {
+            fetch('{% url "get_cart_count" %}')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cart-count').textContent = data.cart_count;
+                });
+        }
+        
+        // Update cart count every 30 seconds
+        setInterval(updateCartCount, 30000);
+        
+        // Update cart count when the page loads
+        document.addEventListener('DOMContentLoaded', updateCartCount);
+        document.getElementById('search-toggle').addEventListener('click', function() {
+            var form = document.getElementById('search-form');
+            form.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
