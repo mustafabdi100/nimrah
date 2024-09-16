@@ -1,3 +1,4 @@
+{%load static%}
 {% load crispy_forms_tags %}
 <!DOCTYPE html>
 <html lang="en">
@@ -5,29 +6,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Commerce Site</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'custom-gold': '#D39901',
-                        'custom-banner': '#D39901',
-                        'footer-bg': '#f3f3f3',
-                        'footer-text': '#333',
-                    },
-                    fontFamily: {
-                        'serif': ['Playfair Display', 'serif'],
-                        'sans': ['Lato', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
+    
     <style>
         .dropdown:hover .dropdown-menu {
             display: block;
@@ -57,85 +42,117 @@
     </style>
 </head>
 <body class="bg-white text-black font-sans">
-    <!-- Delivery Banner -->
-<div id="deliveryBanner" class="bg-white text-black text-center py-3 px-4 relative border-b border-gray-300">
-    <p class="font-serif font-semibold text-sm">Delivery Services Available</p>
-    <button onclick="closeBanner()" class="absolute top-1/2 right-4 transform -translate-y-1/2 text-black font-bold">&times;</button>
-</div>
+     <!-- Delivery Banner -->
+     <div id="deliveryBanner" class="bg-white text-black text-center py-3 px-4 relative border-b border-gray-300">
+        <p class="font-serif font-semibold text-sm">Delivery Services Available</p>
+        <button onclick="closeBanner()" class="absolute top-1/2 right-4 transform -translate-y-1/2 text-black font-bold">&times;</button>
+    </div>
 
-
-   <!-- Navbar -->
-<header class="bg-black text-white py-4">
-    <div class="container mx-auto flex justify-between items-center px-4">
-        <div class="flex items-center space-x-6">
-            <div class="relative">
-                <button id="search-toggle" class="text-sm hover:text-custom-gold transition-colors">Search</button>
-                <form id="search-form" action="{% url 'search' %}" method="get" class="absolute top-full left-0 mt-2 bg-white shadow-md rounded-lg p-4 hidden">
-                    <input type="text" name="q" placeholder="Search products..." class="w-64 px-4 py-2 border rounded-full text-gray-700">
-                    <button type="submit" class="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+    <!-- Navbar -->
+    <header class="bg-pink-600 text-white">
+        <div class="container mx-auto flex justify-between items-center px-4 py-4">
+            <!-- Left Section -->
+            <div class="flex items-center space-x-4">
+                <!-- Hamburger Menu for Mobile -->
+                <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <!-- Search Icon -->
+                <div class="relative">
+                    <button id="search-toggle" class="text-sm hover:text-custom-gold transition-colors">
                         <i class="fas fa-search"></i>
                     </button>
-                </form>
+                    <form id="search-form" action="{% url 'search' %}" method="get" class="absolute top-full left-0 mt-2 bg-white shadow-md rounded-lg p-4 hidden">
+                        <input type="text" name="q" placeholder="Search products..." class="w-64 px-4 py-2 border rounded-full text-gray-700">
+                        <button type="submit" class="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div class="text-center">
-            <h1 class="text-white text-3xl font-serif">Nimrah Skincare</h1>
-        </div>
-        <div class="flex items-center space-x-6">
-            <a href="#" class="text-sm hover:text-custom-gold transition-colors" title="Wishlist">
-                <i class="far fa-heart"></i>
-            </a>
-            <a href="{% url 'view_cart' %}" class="text-sm hover:text-custom-gold transition-colors relative" title="Cart">
-                <i class="fas fa-shopping-cart"></i>
-                <span id="cart-count" class="absolute -top-2 -right-2 bg-custom-gold text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">{{ cart_count }}</span>
-            </a>
-        </div>
-    </div>
-</header>
-    <!-- Navigation Links with Dropdowns -->
-    <!-- Navigation Links with Dropdowns -->
-<!-- Navigation Links with Dropdowns -->
-<nav class="bg-black text-white py-4">
-    <div class="container mx-auto flex justify-center space-x-8">
-        <div class="dropdown inline-block relative group">
-            <a href="{% url 'home' %}" class="text-sm font-semibold hover:text-custom-gold transition-colors py-2">Home</a>
-        </div>
-        
-        {% for category in categories %}
-            <div class="dropdown inline-block relative group">
-                <a href="{% url 'category_products' category.slug %}" class="text-sm font-semibold hover:text-custom-gold transition-colors py-2">
-                    {{ category.name }}
-                </a>
-                {% if category.get_children %}
-                    <ul class="dropdown-menu absolute hidden text-gray-700 pt-2 bg-white shadow-lg rounded-lg mt-0 w-48 z-10 group-hover:block">
-                        {% for subcategory in category.get_children %}
-                            <li class="relative group/sub">
-                                <a class="{% if forloop.first %}rounded-t{% endif %} {% if forloop.last %}rounded-b{% endif %} hover:bg-gray-100 py-2 px-4 block whitespace-no-wrap" 
-                                   href="{% url 'category_products' subcategory.slug %}">
-                                    {{ subcategory.name }}
-                                </a>
-                                {% if subcategory.get_children %}
-                                    <ul class="dropdown-submenu absolute hidden text-gray-700 left-full top-0 bg-white shadow-lg rounded-lg w-48 group-hover/sub:block">
-                                        {% for subsubcategory in subcategory.get_children %}
-                                            <li>
-                                                <a class="{% if forloop.first %}rounded-t{% endif %} {% if forloop.last %}rounded-b{% endif %} hover:bg-gray-100 py-2 px-4 block whitespace-no-wrap" 
-                                                   href="{% url 'category_products' subsubcategory.slug %}">
-                                                    {{ subsubcategory.name }}
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-            </div>
-        {% endfor %}
-    </div>
-</nav>
 
+            <!-- Center Section -->
+            <div class="text-center">
+                <!-- Hide on smaller screens -->
+                <h1 class="text-white text-3xl font-serif hidden md:block">Nimrah Skincare</h1>
+            </div>
+
+            <!-- Right Section -->
+            <div class="flex items-center space-x-4">
+                <!-- Cart Icon -->
+                <a href="{% url 'view_cart' %}" class="text-sm hover:text-custom-gold transition-colors relative" title="Cart">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-custom-gold text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                        {{ request.session.cart_count|default:0 }}
+                    </span>
+                    
+                </a>
+            </div>
+        </div>
+
+        <!-- Navigation Links with Dropdowns -->
+        <nav id="desktop-menu" class="bg-pink-600 text-white py-2 hidden md:block">
+            <div class="container mx-auto flex justify-center space-x-8">
+                <!-- Home Link -->
+                <div class="dropdown inline-block relative group">
+                    <a href="{% url 'home' %}" class="text-sm font-semibold hover:text-custom-gold transition-colors py-2">Home</a>
+                </div>
+
+                <!-- Category Links -->
+                {% for category in categories %}
+                    <div class="dropdown inline-block relative group">
+                        <a href="{% url 'category_products' category.slug %}" class="text-sm font-semibold hover:text-custom-gold transition-colors py-2">
+                            {{ category.name }}
+                        </a>
+                        {% if category.get_children %}
+                            <ul class="dropdown-menu absolute hidden text-gray-700 pt-2 bg-white shadow-lg rounded-lg mt-0 w-48 z-10 group-hover:block">
+                                {% for subcategory in category.get_children %}
+                                    <li class="relative group/sub">
+                                        <a class="hover:bg-gray-100 py-2 px-4 block whitespace-no-wrap" 
+                                           href="{% url 'category_products' subcategory.slug %}">
+                                            {{ subcategory.name }}
+                                        </a>
+                                        {% if subcategory.get_children %}
+                                            <ul class="dropdown-submenu absolute hidden text-gray-700 left-full top-0 bg-white shadow-lg rounded-lg w-48 group-hover/sub:block">
+                                                {% for subsubcategory in subcategory.get_children %}
+                                                    <li>
+                                                        <a class="hover:bg-gray-100 py-2 px-4 block whitespace-no-wrap" 
+                                                           href="{% url 'category_products' subsubcategory.slug %}">
+                                                            {{ subsubcategory.name }}
+                                                        </a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </nav>
+
+        <!-- Mobile Navigation -->
+        <nav id="mobile-menu" class="bg-pink-600 text-white py-2 md:hidden hidden">
+            <div class="container mx-auto px-4">
+                <!-- Home Link -->
+                <a href="{% url 'home' %}" class="block text-sm font-semibold hover:text-custom-gold py-2">Home</a>
+                <!-- Category Links -->
+                {% for category in categories %}
+                    <div class="border-t border-pink-500">
+                        <a href="{% url 'category_products' category.slug %}" class="block text-sm font-semibold hover:text-custom-gold py-2">
+                            {{ category.name }}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </nav>
+    </header>
+
+    <!-- Content Block -->
     {% block content %}{% endblock %}
+
 
     <footer class="bg-footer-bg text-footer-text">
         <div class="container mx-auto py-16 px-4">
@@ -160,7 +177,7 @@
                         </li>
                         <li class="flex items-center">
                             <span class="text-custom-gold">Email:</span>
-                            <span class="ml-2">info@nimrahskincare.com</span>
+                            <span class="ml-2">nimrahburashad@gmail.com</span>
                         </li>
                     </ul>
                 </div>
@@ -210,22 +227,17 @@
             document.getElementById('deliveryBanner').style.display = 'none';
         }
 
-        function updateCartCount() {
-            fetch('{% url "get_cart_count" %}')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('cart-count').textContent = data.cart_count;
-                });
-        }
-        
-        // Update cart count every 30 seconds
-        setInterval(updateCartCount, 30000);
-        
-        // Update cart count when the page loads
-        document.addEventListener('DOMContentLoaded', updateCartCount);
-        document.getElementById('search-toggle').addEventListener('click', function() {
+    
+         // Search Toggle Functionality
+         document.getElementById('search-toggle').addEventListener('click', function() {
             var form = document.getElementById('search-form');
             form.classList.toggle('hidden');
+        });
+
+        // Mobile Menu Toggle Functionality
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            var menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
         });
     </script>
 </body>

@@ -1,17 +1,17 @@
-<!-- checkout.html -->
 {% extends 'base.html' %}
-{%load static%}
-
+{% load static %}
 {% load crispy_forms_tags %}
+
 {% block content %}
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Checkout</h1>
+
     <form method="POST">
         {% csrf_token %}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             <!-- Customer Details -->
             <div>
-                <h2 class="text-2xl font-semibold mb-4">Billing Details</h2>
+                <h2 class="text-xl sm:text-2xl font-semibold mb-4">Billing Details</h2>
                 <div class="space-y-4">
                     {{ form.first_name|as_crispy_field }}
                     {{ form.last_name|as_crispy_field }}
@@ -24,14 +24,15 @@
                     {{ form.order_notes|as_crispy_field }}
                 </div>
             </div>
+
             <!-- Order Summary -->
             <div>
-                <h2 class="text-2xl font-semibold mb-4">Your Order</h2>
+                <h2 class="text-xl sm:text-2xl font-semibold mb-4">Your Order</h2>
                 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                     <ul class="divide-y divide-gray-200">
                         {% for item in cart_items %}
                             <li class="px-4 py-4 sm:px-6">
-                                <div class="flex justify-between">
+                                <div class="flex flex-col sm:flex-row justify-between">
                                     <div>
                                         <h3 class="text-lg font-medium text-gray-900">{{ item.product.name }}</h3>
                                         {% if item.product_size %}
@@ -39,7 +40,7 @@
                                         {% endif %}
                                         <p class="text-sm text-gray-500">Quantity: {{ item.quantity }}</p>
                                     </div>
-                                    <div>
+                                    <div class="mt-2 sm:mt-0">
                                         <p class="text-lg font-medium text-gray-900">KSh {{ item.total_price }}</p>
                                     </div>
                                 </div>
@@ -59,12 +60,12 @@
                         </li>
                     </ul>
                 </div>
-              <!-- Payment Instructions -->
-                <div class="mt-6 p-6 rounded-lg shadow-lg bg-green-100 border border-green-500">
+
+                <!-- Payment Instructions -->
+                <div class="mt-6 p-4 sm:p-6 rounded-lg shadow-lg bg-green-100 border border-green-500">
                     <div class="flex items-center mb-4">
-                        <!-- Replace with M-Pesa logo if available -->
-                        <img src="{% static 'images/mpesa-logo.jpg' %}" alt="M-Pesa" class="h-8 mr-3">
-                        <h3 class="text-xl font-semibold text-green-800">Pay via Pochi la Biashara:</h3>
+                        <img src="{% static 'images/mpesa-logo.jpg' %}" alt="M-Pesa" class="h-6 sm:h-8 mr-3">
+                        <h3 class="text-lg sm:text-xl font-semibold text-green-800">Pay via Pochi la Biashara:</h3>
                     </div>
                     <p class="text-green-700 mb-2">Select “Lipa na M-Pesa” &gt; “Pochi la Biashara.”</p>
                     <p class="text-green-700 mb-2">Enter our Business Number: <strong>0722997917</strong>.</p>
@@ -73,9 +74,10 @@
                     <p class="text-green-700 mb-2">You will receive a confirmation SMS. Your order will be processed once payment is confirmed.</p>
                     <p class="text-green-700">For assistance, contact us at <strong>0722997917</strong>. Thank you for shopping with Nimrah Skin Care!</p>
                 </div>
+
                 <!-- Place Order Button -->
                 <div class="mt-6">
-                    <button type="submit" class="w-full bg-black text-white py-3 px-8 rounded-full hover:bg-gray-800 transition duration-200 font-medium tracking-wide text-center text-lg">
+                    <button type="submit" class="w-full bg-black text-white py-3 px-6 sm:px-8 rounded-full hover:bg-gray-800 transition duration-200 font-medium tracking-wide text-center text-base sm:text-lg">
                         Place Order
                     </button>
                 </div>

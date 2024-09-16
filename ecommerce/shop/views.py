@@ -14,9 +14,31 @@ def get_parent_categories():
     return Category.objects.filter(parent=None)
 
 def home(request):
-    products = Product.objects.all()
-    categories = get_parent_categories()
-    return render(request, 'shop/home.html', {'products': products, 'categories': categories})
+  # Get all featured products
+    featured_products = Product.objects.filter(is_featured=True).order_by('-id')
+    best_seller_products = Product.objects.filter(is_best_seller=True).order_by('id')
+    categories = Category.objects.filter(parent=None)
+    
+    # Get the Supplements category
+    supplements_category = Category.objects.filter(name='Supplements').first()
+    
+    # Get all products from the Supplements category and its descendants
+    if supplements_category:
+        supplement_products = Product.objects.filter(
+            category__in=supplements_category.get_descendants(include_self=True)
+        )
+    else:
+        supplement_products = []
+
+    context = {
+        'categories': categories,
+        'supplement_products': supplement_products,
+        'featured_products': featured_products,
+        'best_seller_products': best_seller_products,
+    }
+    
+    
+    return render(request, 'shop/home.html', context)
 
 def category_products(request, slug):
     category = get_object_or_404(Category, slug=slug)
@@ -47,24 +69,7 @@ def product_detail(request, slug):
         'categories': categories,
         'related_products': related_products,
     })
-    product = get_object_or_404(Product, slug=slug)
-    product_sizes = product.product_sizes.all().order_by('price')
-    reviews = product.reviews.all().order_by('-created_at')
-    categories = Category.objects.filter(level=0)  # Get only root categories
-    
-    # Get related products from the same category or its parent categories
-    category_ids = [product.category.id] + list(product.category.get_ancestors().values_list('id', flat=True))
-    related_products = Product.objects.filter(
-        Q(category__id__in=category_ids) | Q(category__parent__id__in=category_ids)
-    ).exclude(id=product.id).distinct().order_by('?')[:3]
-    
-    return render(request, 'shop/product_detail.html', {
-        'product': product,
-        'product_sizes': product_sizes,
-        'reviews': reviews,
-        'categories': categories,
-        'related_products': related_products,
-    })
+  
 
 @require_POST
 def submit_review(request, slug):
@@ -120,15 +125,29 @@ def add_to_cart(request, slug):
         cart_item.quantity += quantity
         cart_item.save()
 
+    # Get the updated cart count
+    cart_count = sum(item.quantity for item in CartItem.objects.filter(session_key=session_key))
+
     messages.success(request, f"{product.name} added to your cart.")
+    
+    # Redirect with updated cart count in session
+    request.session['cart_count'] = cart_count
     return redirect('product_detail', slug=slug)
+
 
 @require_POST
 def remove_from_cart(request, item_id):
-    cart_item = get_object_or_404(CartItem, id=item_id, session_key=request.session.session_key)
+    session_key = request.session.session_key
+    cart_item = get_object_or_404(CartItem, id=item_id, session_key=session_key)
     cart_item.delete()
+
+    # Recalculate the cart count after removing the item
+    new_cart_count = sum(item.quantity for item in CartItem.objects.filter(session_key=session_key))
+    request.session['cart_count'] = new_cart_count
+
     messages.success(request, "Item removed from your cart.")
     return redirect('view_cart')
+
 
 def view_cart(request):
     if not request.session.session_key:
@@ -139,6 +158,9 @@ def view_cart(request):
     
     total_price = sum(item.total_price for item in cart_items)
     cart_count = sum(item.quantity for item in cart_items)
+    
+    # Update the session cart count to ensure it is always accurate
+    request.session['cart_count'] = cart_count
 
     return render(request, 'shop/cart.html', {
         'cart_items': cart_items,
@@ -146,13 +168,7 @@ def view_cart(request):
         'cart_count': cart_count,
     })
 
-def get_cart_count(request):
-    if not request.session.session_key:
-        return JsonResponse({'cart_count': 0})
 
-    session_key = request.session.session_key
-    cart_count = sum(item.quantity for item in CartItem.objects.filter(session_key=session_key))
-    return JsonResponse({'cart_count': cart_count})
 
 def search(request):
     query = request.GET.get('q')
@@ -195,6 +211,7 @@ def checkout(request):
             order.total_price = grand_total
             order.shipping_price = shipping_price
             order.save()
+
             # Save order items
             for item in cart_items:
                 OrderItem.objects.create(
@@ -204,8 +221,13 @@ def checkout(request):
                     quantity=item.quantity,
                     price=item.total_price
                 )
+
             # Clear the cart
             cart_items.delete()
+
+            # Reset cart count in the session to 0
+            request.session['cart_count'] = 0
+
             # Redirect to a success page
             return render(request, 'shop/order_success.html', {'order': order})
     else:

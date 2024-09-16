@@ -12,15 +12,15 @@ class ProductImageInline(admin.TabularInline):
     extra = 1
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'get_price', 'size')
-    list_filter = ('category', 'uncategorized')
+    list_display = ('name', 'category', 'get_price', 'size', 'is_featured', 'is_best_seller')  # Display is_best_seller
+    list_filter = ('category', 'uncategorized', 'is_featured', 'is_best_seller')  # Add filter for is_best_seller
     search_fields = ('name', 'description')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductSizeInline, ProductImageInline]
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'category', 'image', 'description')
+            'fields': ('name', 'slug', 'category', 'image', 'description', 'is_featured', 'is_best_seller')  # Add is_best_seller to form
         }),
         ('Single Size Product', {
             'fields': ('price', 'size'),
@@ -28,6 +28,7 @@ class ProductAdmin(admin.ModelAdmin):
             'description': "Only fill these if the product comes in a single size. Otherwise, use the 'Product Sizes' section below."
         }),
     )
+
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'parent')

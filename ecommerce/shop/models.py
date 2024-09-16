@@ -32,14 +32,17 @@ class Product(models.Model):
     category = models.ForeignKey(Category, related_name='products', on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=255)
     image = models.ImageField(upload_to='products/')
-    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Keep this for backwards compatibility
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     slug = models.SlugField(unique=True)
     uncategorized = models.BooleanField(default=False)
     description = models.TextField(blank=True)
-    size = models.CharField(max_length=50, blank=True)  # Keep this for backwards compatibility
+    size = models.CharField(max_length=50, blank=True)
+    is_featured = models.BooleanField(default=False)  # New field to mark featured products
+    is_best_seller = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
+
 
     def save(self, *args, **kwargs):
         if not self.category:
